@@ -8,7 +8,7 @@ int main()
 
 	CollisionManager collisionManager(window);
 
-	window.setFramerateLimit(60);
+	window.setFramerateLimit(180);
 
 	bool mousePressed = false;
 
@@ -30,10 +30,10 @@ int main()
             }
         }
 
-		if (mousePressed)
+		/*if (mousePressed)
 		{
 			collisionManager.followMouse(sf::Mouse::getPosition(window));
-		}
+		}*/
 
 
 		window.clear(sf::Color::Black);
