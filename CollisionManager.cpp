@@ -4,47 +4,35 @@ CollisionManager::CollisionManager(sf::RenderWindow& window) : window(window)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> distrib(-50, 50);
+	std::uniform_int_distribution<> speed(-5, 5);
+	std::uniform_int_distribution<> size(10, 100);
+	std::uniform_int_distribution<> quantity(2, 6);
+	std::uniform_int_distribution<> posX(100, 700);
+	std::uniform_int_distribution<> posY(100, 500);
+	std::uniform_int_distribution<> color(0, 24);
 
-	circles.push_back(Circle(50, 50, 50, sf::Color::Blue, sf::Vector2f(distrib(gen), distrib(gen))));
-	circles.push_back(Circle(15, 50, 50, sf::Color::Red, sf::Vector2f(distrib(gen), distrib(gen))));
-	circles.push_back(Circle(100, 300, 10, sf::Color::Yellow, sf::Vector2f(distrib(gen), distrib(gen))));
-	circles.push_back(Circle(600, 500, 150, sf::Color::Cyan, sf::Vector2f(distrib(gen), distrib(gen))));
+	for (int i = 0; i < quantity(gen); i++)
+	{
+		circles.push_back(Circle(posX(gen), posY(gen), size(gen), colorList[color(gen)], sf::Vector2f(speed(gen), speed(gen))));
 
+	}
 };
 
 void CollisionManager::drawCircles()
 {
 	for (auto& circle : circles)
 	{
-		circle.update(window);
 		circle.borderCollide(window.getSize());
 		for (auto& otherCircle : circles)
 		{
 			if (&circle != &otherCircle)
 			{
-				circle.circleCollide(otherCircle);
+				circle.circleCollide(otherCircle, window);
 			}
 		}
+	}
+	for (auto& circle : circles)
+	{
+		circle.update(window);
 	}
 };
-
-/*void CollisionManager::followMouse(sf::Vector2i mousePos)
-{
-	for (auto& circleA : circles)
-	{
-		bool follow = true;
-		for (auto& circleB : circles)
-		{
-			if (&circleA != &circleB)
-			{
-				if (circleA.isCollide(circleB))
-				{
-					follow = false;
-				}
-			}
-		}
-		if (follow)
-			circleA.followMouse(mousePos);
-	}
-}*/

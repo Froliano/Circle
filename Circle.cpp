@@ -1,4 +1,6 @@
 #include "Circle.hpp"
+#include <thread>
+#include <chrono>
 
 Circle::Circle(float x, float y, float r, sf::Color color, sf::Vector2f offset) : pos(x, y), radius(r), color(color)
 {
@@ -6,28 +8,46 @@ Circle::Circle(float x, float y, float r, sf::Color color, sf::Vector2f offset) 
 	shape.setRadius(radius);
 	shape.setFillColor(color);
 
-	posOffset = normalize(offset);
+	posOffset = offset;
+	vitesse = offset;
+	std::cout << "Circle created at position: (" << posOffset.x << ", " << posOffset.y << ") with radius: " << radius << std::endl;
 }
 
 void Circle::update(sf::RenderWindow& window)
 {
 	pos += posOffset;
+	vitesse = posOffset;
 	shape.setPosition(pos);
 	window.draw(shape);
 }
 
-void Circle::circleCollide(Circle circle)
+void Circle::circleCollide(Circle& circle, sf::RenderWindow& window)
 {
 	sf::Vector2f centerA = getCenter();
 	sf::Vector2f centerB = circle.getCenter();
 
-	sf::Vector2f offset = sf::Vector2f(centerB.x - centerA.x, centerB.y - centerA.y);
-	float distance = std::sqrt(offset.x * offset.x + offset.y * offset.y);
+	float distance = std::sqrt(((centerB.x - centerA.x) * (centerB.x - centerA.x)) + ((centerB.y - centerA.y) * (centerB.y - centerA.y)));
 	
 	if (distance < radius + circle.radius)
 	{
-		sf::Vector2f normalizedOffset = normalize(offset);
-		posOffset = -normalizedOffset;
+
+		// vecteur qui défini la direction du rebond
+		sf::Vector2f normal = sf::Vector2f(centerA.x - centerB.x, centerA.y - centerB.y);
+		normal = normalize(normal);
+
+		//vitesse relative du cercle par rapport au objects autour
+		sf::Vector2f relativeVelocity = vitesse - circle.vitesse;
+
+		// Vérifier si les cercles se rapprochent
+		float dotProduct = normal.x * relativeVelocity.x + normal.y * relativeVelocity.y;
+		if (dotProduct > 0) return;
+
+		// Calculer la nouvelle vitesse après collision
+		float restitution = 0.5f; // Coefficient de restitution pour la collision
+		float impulsion = (-(1 + restitution) * dotProduct) / (1/radius + 1/circle.radius);
+
+		// Appliquer la nouvelle vitesse
+		posOffset = vitesse + sf::Vector2f(((impulsion / radius) * normal.x), ((impulsion / radius) * normal.y));
 	}
 }
 
@@ -66,17 +86,3 @@ sf::Vector2f Circle::normalize(sf::Vector2f vector)
 	}
 	return sf::Vector2f(vector.x / length, vector.y / length);
 }
-
-/*void Circle::followMouse(sf::Vector2i mousePos)
-{
-	sf::Vector2f offset = sf::Vector2f(mousePos.x - getCenter().x, mousePos.y - getCenter().y);
-	float norme = std::sqrt(offset.x * offset.x + offset.y * offset.y);
-	float factor = 1 / std::abs(norme);
-	offset *= factor;
-
-	pos.x += offset.x;
-	pos.y += offset.y;
-
-	shape.setPosition(pos);
-
-}*/

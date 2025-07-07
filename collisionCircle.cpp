@@ -8,7 +8,7 @@ int main()
 
 	CollisionManager collisionManager(window);
 
-	window.setFramerateLimit(180);
+	window.setFramerateLimit(60);
 
 	bool mousePressed = false;
 
